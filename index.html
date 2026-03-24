@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>     Aplikasi Integral Kalkulus </title>
+    <!-- MathJax (opsional) -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <!-- Math.js untuk evaluasi ekspresi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
+    <!-- Chart.js untuk grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 30px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #4a00e0;
+            margin-top: 0;
+            border-bottom: 3px solid #8e2de2;
+            padding-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+        #randomThemeBtn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: 0.3s;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+        #randomThemeBtn:hover {
+            transform: scale(1.05);
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .tab-button {
+            background: linear-gradient(145deg, #f0f0f0, #ffffff);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+            flex: 1 1 auto;
+            min-width: 140px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .tab-button.active {
+            background: linear-gradient(145deg, #8e2de2, #4a00e0);
+            color: white;
+            box-shadow: 0 8px 20px rgba(142,45,226,0.6);
+            transform: translateY(-2px);
+        }
+        .tab-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+        .tab-content {
+            display: none;
+            animation: fade 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fade {
+            from {opacity: 0.4; transform: translateY(5px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .card {
+            background: rgba(255,255,255,0.8);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        label {
+            font-weight: 600;
+            color: #4a00e0;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 15px;
+            transition: 0.3s;
+            background: white;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #8e2de2;
+            box-shadow: 0 0 0 4px rgba(142,45,226,0.2);
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .col {
+            flex: 1 1 200px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 60px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.4s;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 20px rgba(142,45,226,0.4);
+            margin: 15px 0;
+        }
+        .btn:hover {
+            background: linear-gradient(45deg, #a15cf0, #6a1bd2);
+            transform: scale(1.02) translateY(-3px);
+            box-shadow: 0 15px 30px rgba(142,45,226,0.7);
+        }
+        .result-box {
+            margin-top: 20px;
+            background: #2d3436;
+            color: #f6e58d;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 26px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            border-left: 10px solid #f9ca24;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .desc {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .info {
+            background: #dff9fb;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 10px 0;
+            font-size: 14px;
+            border-left: 6px solid #22a6b3;
+        }
+        .chart-container {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            height: 300px;
+            width: 100%;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #4a00e0;
+            font-size: 15px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>     APLIKASI INTEGRAL KALKULUS</h1>
+        <button id="randomThemeBtn" title="Ganti tema warna secara acak"></button>
+    </div>
+    <div class="tabs">
+        <button class="tab-button active" data-tab="luas">📏 Luas Daerah</button>
+        <button class="tab-button" data-tab="volume">🥫 Volume Benda Putar</button>
+        <button class="tab-button" data-tab="pusat">⚖️ Pusat Massa</button>
+        <button class="tab-button" data-tab="kerja">🔧 Kerja (Usaha)</button>
+    </div>
+
+    <!-- Tab Luas Daerah -->
+    <div id="luas" class="tab-content active">
+        <div class="card">
+            <h2>Luas antara dua kurva</h2>
+            <div class="info">Rumus: \( L = \int_a^b |f(x) - g(x)| \, dx \)</div>
+            <div class="row">
+                <div class="col">
+                    <label>Fungsi atas f(x):</label>
+                    <input type="text" id="luas_f" value="x+4" placeholder="contoh: x^2">
+                </div>
+                <div class="col">
+                    <label>Fungsi bawah g(x):</label>
+                    <input type="text" id="luas_g" value="x^2-2" placeholder="contoh: x">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>Batas bawah a:</label>
+                    <input type="number" id="luas_a" value="-2" step="any">
+                </div>
+                <div class="col">
+                    <label>Batas atas b:</label>
+                    <input type="number" id="luas_b" value="3" step="any">
+                </div>
+            </div>
+            <button class="btn" id="hitungLuas">✨ Hitung Luas & Tampilkan Grafik ✨</button>
+            <div id="hasilLuas" class="result-box">Hasil akan muncul di sini</div>
+            <div class="chart-container">
+                <canvas id="chartLuas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Volume Benda Putar -->
+    <div id="volume" class="tab-content">
+        <div class="card">
+            <h2>Volume Benda Putar</h2>
+            <div class="row">
+                <div class="col">
+                    <label>Metode:</label>
+                    <select id="vol_metode">
+                        <option value="cakram">Cakram (sumbu x)</option>
+                        <option value="cakram_y">Cakram (sumbu y)</option>
+                        <option value="cincin">Cincin (sumbu x)</option>
+                        <option value="kulit">Kulit Tabung (sumbu y)</option>
+                    </select>
+                </div>
+            </div>
+            <div id="vol_inputs"></div>
+            <button class="btn" id="hitungVolume">✨ Hitung Volume & Tampilkan Grafik ✨</button>
+            <div id="hasilVolume" class="result-box">Hasil akan muncul di sini</div>
+            <div class="chart-container">
+                <canvas id="chartVolume"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Pusat Massa -->
+    <div id="pusat" class="tab-content">
+        <div class="card">
+            <h2>Pusat Massa (x̄, ȳ) daerah</h2>
+            <div class="info">Massa = ∫ (f-g) dx, Mx = ½∫ (f²-g²) dx, My = ∫ x(f-g) dx</div>
+            <div class="row">
+                <div class="col">
+                    <label>Kurva atas f(x):</label>
+                    <input type="text" id="pusat_f" value="4" placeholder="f(x)">
+                </div>
+                <div class="col">
+                    <label>Kurva bawah g(x):</label>
+                    <input type="text" id="pusat_g" value="x^2" placeholder="g(x)">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>Batas a:</label>
+                    <input type="number" id="pusat_a" value="-2" step="any">
+                </div>
+                <div class="col">
+                    <label>Batas b:</label>
+                    <input type="number" id="pusat_b" value="2" step="any">
+                </div>
+            </div>
+            <button class="btn" id="hitungPusat">✨ Hitung Pusat Massa & Tampilkan Grafik ✨</button>
+            <div id="hasilPusat" class="result-box">Hasil akan muncul di sini</div>
+            <div class="chart-container">
+                <canvas id="chartPusat"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Kerja (tanpa grafik) -->
+    <div id="kerja" class="tab-content">
+        <div class="card">
+            <h2>Kerja (Usaha)</h2>
+            <div class="row">
+                <div class="col">
+                    <label>Jenis:</label>
+                    <select id="kerja_jenis">
+                        <option value="pegas">Pegas (F = kx)</option>
+                        <option value="rantai">Rantai tergantung</option>
+                        <option value="tangki">Tangki kerucut</option>
+                    </select>
+                </div>
+            </div>
+            <div id="kerja_inputs"></div>
+            <button class="btn" id="hitungKerja">✨ Hitung Usaha ✨</button>
+            <div id="hasilKerja" class="result-box">Hasil akan muncul di sini</div>
+        </div>
+    </div>
+
+    <footer>Tugas Project OBE - Kalkulus Integral | Warna tema & grafik berubah otomatis</footer>
+</div>
+
+<script>
+    // ==================== FUNGSI WARNA ACAK CERAH ====================
+    function randomColor() {
+        const hue = Math.floor(Math.random() * 360);
+        return `hsl(${hue}, 80%, 60%)`; // warna cerah
+    }
+
+    // ==================== FUNGSI RANDOM THEME (UBAH WARNA UI) ====================
+    function randomTheme() {
+        const hue1 = Math.floor(Math.random() * 360);
+        const hue2 = (hue1 + 40) % 360;
+        const grad1 = `hsl(${hue1}, 70%, 55%)`;
+        const grad2 = `hsl(${hue2}, 70%, 45%)`;
+        document.body.style.background = `linear-gradient(135deg, ${grad1} 0%, ${grad2} 100%)`;
+        
+        const activeColor = `hsl(${hue1}, 80%, 50%)`;
+        const style = document.createElement('style');
+        style.id = 'dynamic-theme';
+        const oldStyle = document.getElementById('dynamic-theme');
+        if (oldStyle) oldStyle.remove();
+        style.textContent = `
+            .tab-button.active {
+                background: linear-gradient(145deg, ${activeColor}, ${`hsl(${hue2}, 70%, 40%)`}) !important;
+                box-shadow: 0 8px 20px ${activeColor}80 !important;
+            }
+            .btn {
+                background: linear-gradient(45deg, ${activeColor}, ${`hsl(${hue2}, 70%, 40%)`}) !important;
+                box-shadow: 0 8px 20px ${activeColor}80 !important;
+            }
+            .btn:hover {
+                background: linear-gradient(45deg, ${`hsl(${hue1}, 70%, 60%)`}, ${`hsl(${hue2}, 70%, 50%)`}) !important;
+                box-shadow: 0 15px 30px ${activeColor}cc !important;
+            }
+            h1 {
+                border-bottom-color: ${activeColor} !important;
+            }
+            label {
+                color: ${activeColor} !important;
+            }
+            .result-box {
+                border-left-color: ${activeColor} !important;
+            }
+            .info {
+                border-left-color: ${activeColor} !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ==================== NUMERICAL INTEGRATION ====================
+    function integral(f, a, b, n = 1000) {
+        if (a === b) return 0;
+        let h = (b - a) / n;
+        let sum = 0.5 * (f(a) + f(b));
+        for (let i = 1; i < n; i++) {
+            sum += f(a + i * h);
+        }
+        return sum * h;
+    }
+
+    // Fungsi untuk mengevaluasi ekspresi matematika string menjadi fungsi numerik
+    function makeFunction(expr) {
+        try {
+            const compiled = math.compile(expr);
+            return (x) => {
+                try {
+                    return compiled.evaluate({ x: x });
+                } catch (e) {
+                    return NaN;
+                }
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // ==================== TAB SWITCHING ====================
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            tabButtons.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // ==================== GRAFIK: variabel global untuk menyimpan instance chart ====================
+    let luasChart, volumeChart, pusatChart;
+
+    // Fungsi bantu untuk generate data points
+    function generatePoints(func, xMin, xMax, steps = 200) {
+        const points = [];
+        const step = (xMax - xMin) / steps;
+        for (let i = 0; i <= steps; i++) {
+            const x = xMin + i * step;
+            const y = func(x);
+            points.push({ x, y });
+        }
+        return points;
+    }
+
+    // Fungsi untuk menggambar chart (Line Chart) dengan warna acak dan anti-blur
+    function renderChart(canvasId, chartRef, datasets, xLabel = 'x', yLabel = 'y') {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d');
+        if (chartRef) chartRef.destroy();
+
+        const container = canvas.parentElement;
+        if (!container) return null;
+
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const width = containerWidth > 0 ? containerWidth : 600;
+        const height = containerHeight > 0 ? containerHeight : 300;
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+
+        ctx.scale(dpr, dpr);
+
+        datasets.forEach(ds => {
+            if (!ds.borderColor) ds.borderColor = randomColor(); // Warna acak setiap render
+            ds.backgroundColor = 'transparent';
+            ds.borderWidth = 3;
+            ds.tension = 0.1;
+        });
+
+        const newChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: datasets },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                devicePixelRatio: 1,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: xLabel, color: '#333', font: { weight: 'bold' } }
+                    },
+                    y: {
+                        title: { display: true, text: yLabel, color: '#333', font: { weight: 'bold' } }
+                    }
+                },
+                plugins: {
+                    legend: { display: true, labels: { color: '#4a00e0', font: { size: 14 } } },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                elements: { point: { radius: 0 } }
+            }
+        });
+
+        newChart.update();
+        return newChart;
+    }
+
+    // ==================== VOLUME - INPUT DINAMIS ====================
+    const volMetode = document.getElementById('vol_metode');
+    const volInputsDiv = document.getElementById('vol_inputs');
+    function updateVolInputs() {
+        const metode = volMetode.value;
+        let html = '';
+        if (metode === 'cakram') {
+            html = `
+                <div class="row"><div class="col"><label>Fungsi f(x) (jari-jari):</label><input type="text" id="vol_f" value="1-x^2" placeholder="f(x)"></div></div>
+                <div class="row"><div class="col"><label>Batas a:</label><input type="number" id="vol_a" value="0" step="any"></div><div class="col"><label>Batas b:</label><input type="number" id="vol_b" value="1" step="any"></div></div>
+                <p class="desc">Volume = π ∫ f(x)² dx</p>
+            `;
+        } else if (metode === 'cakram_y') {
+            html = `
+                <div class="row"><div class="col"><label>Fungsi f(y) (jari-jari):</label><input type="text" id="vol_f" value="sqrt(y)" placeholder="f(y)"></div></div>
+                <div class="row"><div class="col"><label>Batas a (y):</label><input type="number" id="vol_a" value="0" step="any"></div><div class="col"><label>Batas b (y):</label><input type="number" id="vol_b" value="4" step="any"></div></div>
+                <p class="desc">Volume = π ∫ f(y)² dy</p>
+            `;
+        } else if (metode === 'cincin') {
+            html = `
+                <div class="row"><div class="col"><label>Fungsi luar f(x):</label><input type="text" id="vol_f" value="2x" placeholder="f(x)"></div><div class="col"><label>Fungsi dalam g(x):</label><input type="text" id="vol_g" value="x^2" placeholder="g(x)"></div></div>
+                <div class="row"><div class="col"><label>Batas a:</label><input type="number" id="vol_a" value="0" step="any"></div><div class="col"><label>Batas b:</label><input type="number" id="vol_b" value="2" step="any"></div></div>
+                <p class="desc">Volume = π ∫ [f(x)² - g(x)²] dx</p>
+            `;
+        } else if (metode === 'kulit') {
+            html = `
+                <div class="row"><div class="col"><label>Tinggi kulit h(x):</label><input type="text" id="vol_f" value="(2-x)-x^2" placeholder="h(x)"></div></div>
+                <div class="row"><div class="col"><label>Batas a:</label><input type="number" id="vol_a" value="0" step="any"></div><div class="col"><label>Batas b:</label><input type="number" id="vol_b" value="1" step="any"></div></div>
+                <p class="desc">Volume = 2π ∫ x * h(x) dx</p>
+            `;
+        }
+        volInputsDiv.innerHTML = html;
+    }
+    volMetode.addEventListener('change', updateVolInputs);
+    updateVolInputs();
+
+    // ==================== KERJA - INPUT DINAMIS ====================
+    const kerjaJenis = document.getElementById('kerja_jenis');
+    const kerjaInputsDiv = document.getElementById('kerja_inputs');
+    function updateKerjaInputs() {
+        const jenis = kerjaJenis.value;
+        let html = '';
+        if (jenis === 'pegas') {
+            html = `
+                <div class="row"><div class="col"><label>Konstanta pegas k:</label><input type="number" id="kerja_k" value="5" step="any"></div></div>
+                <div class="row"><div class="col"><label>Posisi awal x0:</label><input type="number" id="kerja_x0" value="0" step="any"></div><div class="col"><label>Posisi akhir x1:</label><input type="number" id="kerja_x1" value="3" step="any"></div></div>
+                <p class="desc">Usaha = ∫ k x dx dari x0 ke x1</p>
+            `;
+        } else if (jenis === 'rantai') {
+            html = `
+                <div class="row"><div class="col"><label>Berat per kaki (lb/ft):</label><input type="number" id="kerja_w" value="2" step="any"></div><div class="col"><label>Panjang rantai (ft):</label><input type="number" id="kerja_L" value="100" step="any"></div></div>
+                <p class="desc">Usaha = ∫₀ᴸ w (L - y) dy</p>
+            `;
+        } else if (jenis === 'tangki') {
+            html = `
+                <div class="row"><div class="col"><label>Tinggi tangki H:</label><input type="number" id="kerja_H" value="10" step="any"></div><div class="col"><label>Jari-jari atas R:</label><input type="number" id="kerja_R" value="4" step="any"></div></div>
+                <div class="row"><div class="col"><label>Berat jenis ρ:</label><input type="number" id="kerja_rho" value="62.5" step="any"></div></div>
+                <p class="desc">Usaha = ρ π ∫₀ᴴ (R y/H)² (H - y) dy</p>
+            `;
+        }
+        kerjaInputsDiv.innerHTML = html;
+    }
+    kerjaJenis.addEventListener('change', updateKerjaInputs);
+    updateKerjaInputs();
+
+    // ==================== FUNGSI HITUNG ====================
+
+    // Luas
+    document.getElementById('hitungLuas').addEventListener('click', function() {
+        const fExpr = document.getElementById('luas_f').value.trim();
+        const gExpr = document.getElementById('luas_g').value.trim();
+        const a = parseFloat(document.getElementById('luas_a').value);
+        const b = parseFloat(document.getElementById('luas_b').value);
+        if (isNaN(a) || isNaN(b)) { alert('Batas harus angka'); return; }
+        const f = makeFunction(fExpr);
+        const g = makeFunction(gExpr);
+        if (!f || !g) { alert('Kesalahan dalam ekspresi fungsi'); return; }
+
+        const integrand = (x) => Math.abs(f(x) - g(x));
+        const luas = integral(integrand, a, b, 5000);
+        document.getElementById('hasilLuas').innerHTML = `Luas = ${luas.toFixed(6)}`;
+
+        const padding = (b - a) * 0.2;
+        const xMin = a - padding;
+        const xMax = b + padding;
+        const pointsF = generatePoints(f, xMin, xMax);
+        const pointsG = generatePoints(g, xMin, xMax);
+
+        const datasets = [
+            { label: `f(x) = ${fExpr}`, data: pointsF },
+            { label: `g(x) = ${gExpr}`, data: pointsG }
+        ];
+        luasChart = renderChart('chartLuas', luasChart, datasets, 'x', 'y');
+    });
+
+    // Volume
+    document.getElementById('hitungVolume').addEventListener('click', function() {
+        const metode = volMetode.value;
+        let hasil = 0;
+        let f, g, a, b, exprF, exprG;
+        try {
+            if (metode === 'cakram') {
+                exprF = document.getElementById('vol_f').value.trim();
+                a = parseFloat(document.getElementById('vol_a').value);
+                b = parseFloat(document.getElementById('vol_b').value);
+                f = makeFunction(exprF);
+                if (!f) throw 'Error fungsi';
+                hasil = Math.PI * integral((x) => Math.pow(f(x), 2), a, b, 5000);
+                const padding = (b - a) * 0.2;
+                const xMin = a - padding;
+                const xMax = b + padding;
+                const points = generatePoints(f, xMin, xMax);
+                const datasets = [ { label: `f(x) = ${exprF}`, data: points } ];
+                volumeChart = renderChart('chartVolume', volumeChart, datasets, 'x', 'y');
+            }
+            else if (metode === 'cakram_y') {
+                exprF = document.getElementById('vol_f').value.trim();
+                a = parseFloat(document.getElementById('vol_a').value);
+                b = parseFloat(document.getElementById('vol_b').value);
+                f = makeFunction(exprF);
+                if (!f) throw 'Error fungsi';
+                hasil = Math.PI * integral((y) => Math.pow(f(y), 2), a, b, 5000);
+                const padding = (b - a) * 0.2;
+                const yMin = a - padding;
+                const yMax = b + padding;
+                const points = generatePoints(f, yMin, yMax);
+                const datasets = [ { label: `f(y) = ${exprF}`, data: points } ];
+                volumeChart = renderChart('chartVolume', volumeChart, datasets, 'y', 'f(y)');
+            }
+            else if (metode === 'cincin') {
+                exprF = document.getElementById('vol_f').value.trim();
+                exprG = document.getElementById('vol_g').value.trim();
+                a = parseFloat(document.getElementById('vol_a').value);
+                b = parseFloat(document.getElementById('vol_b').value);
+                f = makeFunction(exprF);
+                g = makeFunction(exprG);
+                if (!f || !g) throw 'Error fungsi';
+                hasil = Math.PI * integral((x) => Math.pow(f(x), 2) - Math.pow(g(x), 2), a, b, 5000);
+                const padding = (b - a) * 0.2;
+                const xMin = a - padding;
+                const xMax = b + padding;
+                const pointsF = generatePoints(f, xMin, xMax);
+                const pointsG = generatePoints(g, xMin, xMax);
+                const datasets = [
+                    { label: `f(x) = ${exprF}`, data: pointsF },
+                    { label: `g(x) = ${exprG}`, data: pointsG }
+                ];
+                volumeChart = renderChart('chartVolume', volumeChart, datasets, 'x', 'y');
+            }
+            else if (metode === 'kulit') {
+                exprF = document.getElementById('vol_f').value.trim();
+                a = parseFloat(document.getElementById('vol_a').value);
+                b = parseFloat(document.getElementById('vol_b').value);
+                f = makeFunction(exprF);
+                if (!f) throw 'Error fungsi';
+                hasil = 2 * Math.PI * integral((x) => x * f(x), a, b, 5000);
+                const padding = (b - a) * 0.2;
+                const xMin = a - padding;
+                const xMax = b + padding;
+                const points = generatePoints(f, xMin, xMax);
+                const datasets = [ { label: `h(x) = ${exprF}`, data: points } ];
+                volumeChart = renderChart('chartVolume', volumeChart, datasets, 'x', 'h(x)');
+            }
+            document.getElementById('hasilVolume').innerHTML = `Volume = ${hasil.toFixed(6)} satuan volume`;
+        } catch (e) {
+            alert('Input tidak valid: ' + e);
+        }
+    });
+
+    // Pusat Massa
+    document.getElementById('hitungPusat').addEventListener('click', function() {
+        const fExpr = document.getElementById('pusat_f').value.trim();
+        const gExpr = document.getElementById('pusat_g').value.trim();
+        const a = parseFloat(document.getElementById('pusat_a').value);
+        const b = parseFloat(document.getElementById('pusat_b').value);
+        if (isNaN(a) || isNaN(b)) { alert('Batas harus angka'); return; }
+        const f = makeFunction(fExpr);
+        const g = makeFunction(gExpr);
+        if (!f || !g) { alert('Fungsi tidak valid'); return; }
+
+        const m = integral((x) => f(x) - g(x), a, b, 5000);
+        if (m === 0) { alert('Massa nol, tidak dapat menghitung pusat massa'); return; }
+        const Mx = 0.5 * integral((x) => Math.pow(f(x), 2) - Math.pow(g(x), 2), a, b, 5000);
+        const My = integral((x) => x * (f(x) - g(x)), a, b, 5000);
+        const xbar = My / m;
+        const ybar = Mx / m;
+        document.getElementById('hasilPusat').innerHTML = `x̄ = ${xbar.toFixed(6)}, ȳ = ${ybar.toFixed(6)}`;
+
+        const padding = (b - a) * 0.2;
+        const xMin = a - padding;
+        const xMax = b + padding;
+        const pointsF = generatePoints(f, xMin, xMax);
+        const pointsG = generatePoints(g, xMin, xMax);
+        const datasets = [
+            { label: `f(x) = ${fExpr}`, data: pointsF },
+            { label: `g(x) = ${gExpr}`, data: pointsG }
+        ];
+        pusatChart = renderChart('chartPusat', pusatChart, datasets, 'x', 'y');
+    });
+
+    // Kerja
+    document.getElementById('hitungKerja').addEventListener('click', function() {
+        const jenis = kerjaJenis.value;
+        let hasil = 0;
+        try {
+            if (jenis === 'pegas') {
+                const k = parseFloat(document.getElementById('kerja_k').value);
+                const x0 = parseFloat(document.getElementById('kerja_x0').value);
+                const x1 = parseFloat(document.getElementById('kerja_x1').value);
+                hasil = integral((x) => k * x, x0, x1, 5000);
+            } else if (jenis === 'rantai') {
+                const w = parseFloat(document.getElementById('kerja_w').value);
+                const L = parseFloat(document.getElementById('kerja_L').value);
+                hasil = integral((y) => w * (L - y), 0, L, 5000);
+            } else if (jenis === 'tangki') {
+                const H = parseFloat(document.getElementById('kerja_H').value);
+                const R = parseFloat(document.getElementById('kerja_R').value);
+                const rho = parseFloat(document.getElementById('kerja_rho').value);
+                hasil = integral((y) => rho * Math.PI * Math.pow((R / H) * y, 2) * (H - y), 0, H, 5000);
+            }
+            document.getElementById('hasilKerja').innerHTML = `Usaha = ${hasil.toFixed(6)} satuan kerja`;
+        } catch (e) {
+            alert('Input tidak valid: ' + e);
+        }
+    });
+
+    // Inisialisasi tema acak pertama kali
+    randomTheme();
+</script>
+</body>
+</html>
